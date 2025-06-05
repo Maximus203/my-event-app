@@ -1,0 +1,16 @@
+// backend/tsconfig.json : tsconfig.json backend : configuration TypeScript pour NodeJS
+{
+        "compilerOptions": {
+                "target": "es6",
+                "module": "commonjs",
+                "esModuleInterop": true,
+                "skipLibCheck": true,
+                "forceConsistentCasingInFileNames": true
+        },
+        "include": [
+                "src/**/*.ts"
+        ],
+        "exclude": [
+                "node_modules"
+        ]
+}

@@ -1,0 +1,6 @@
+// backend/.gitignore : Gitignore backend : ignorer node_modules, dist, .env, .sqlite
+
+.env
+node_modules/
+dist/
+*.sqlite

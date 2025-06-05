@@ -1,0 +1,1 @@
+// backend/ormconfig.json : Configuration TypeORM pour SQLite (type: sqlite, database: process.env.DB_PATH, entities: ["src/entities/**/*.ts"], migrations: ["src/migrations/**/*.ts"])

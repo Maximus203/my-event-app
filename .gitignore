@@ -1,0 +1,3 @@
+// .gitignore : Fichier Gitignore racine : ignorer node_modules, dist, .env, etc.
+
+Conception.md
