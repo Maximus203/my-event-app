@@ -1,1 +1,35 @@
-// backend/src/dtos/CreateEventDto.ts : DTO CreateEventDto : class-validator pour valider title, description (optionnelle), date lors de la création d’un événement
+/**
+ * CreateEventDto : DTO pour la création d'un événement
+ */
+
+import {
+  IsString,
+  IsOptional,
+  IsDateString,
+  IsNumber,
+  Min,
+} from "class-validator";
+
+export class CreateEventDto {
+  @IsString({ message: "Le titre doit être une chaîne" })
+  title: string;
+
+  @IsOptional()
+  @IsString({ message: "La description doit être une chaîne" })
+  description?: string;
+
+  @IsDateString({}, { message: "La date doit être au format ISO" })
+  date: string;
+
+  @IsOptional()
+  @IsString({ message: "Le lieu doit être une chaîne" })
+  location?: string;
+
+  @IsOptional()
+  @IsNumber(
+    {},
+    { message: "Le nombre maximum de participants doit être un nombre" }
+  )
+  @Min(1, { message: "Le nombre maximum de participants doit être au moins 1" })
+  maxParticipants?: number;
+}
