@@ -210,14 +210,14 @@ export class EventController {
   static async subscribe(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { email } = req.body;
+      const { email, name } = req.body;
 
       if (!email) {
         ResponseFormatter.error(res, "Email requis", 400);
         return;
       }
 
-      const participant = await EventService.subscribeToEvent(id, email);
+      const participant = await EventService.subscribeToEvent(id, { email, name });
 
       EventController.logger.log("info", "Inscription à l'événement via API", {
         eventId: id,

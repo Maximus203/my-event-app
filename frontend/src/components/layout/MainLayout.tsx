@@ -115,7 +115,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   <button
                     onClick={handleUserMenuToggle}
                     className="flex items-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >                  {user?.photo ? (
+                  >  {user?.photo ? (
                       <img
                         className="h-6 w-6 rounded-full"
                         src={user.photo}

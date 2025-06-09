@@ -189,7 +189,7 @@ export class EventService {
   /**
    * S'inscrire à un événement
    */
-  static async subscribeToEvent(eventId: string, email: string) {
+  static async subscribeToEvent(eventId: string, {email, name}: {email: string, name: string}) {
     try {
       const event = await EventRepo.findById(eventId);
       if (!event) {
@@ -210,7 +210,7 @@ export class EventService {
         throw new Error("Impossible de s'inscrire à un événement passé");
       }
 
-      const participant = await ParticipantRepo.subscribe(event, email);
+      const participant = await ParticipantRepo.subscribe(event, email, name);
 
       // Envoyer email de confirmation
       const emailTemplate = getConfirmationEmailTemplate(
@@ -226,6 +226,7 @@ export class EventService {
       this.logger.log("info", "Inscription à l'événement réussie", {
         eventId,
         email,
+        name,
         participantId: participant.id,
       });
 
@@ -235,6 +236,7 @@ export class EventService {
         error: error instanceof Error ? error.message : String(error),
         eventId,
         email,
+        name,
       });
       throw error;
     }

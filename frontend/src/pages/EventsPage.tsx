@@ -42,14 +42,14 @@ const EventsPage: React.FC = () => {
   useEffect(() => {
     filterAndSortEvents();
   }, [events, debouncedCategory, debouncedSortBy]);
+  
+  
   const fetchEvents = async () => {
     try {
       setLoading(true);
       setError(null);
       const response = await eventService.getAllEvents();
       const eventsData = response.data || [];
-      console.log('Événements récupérés:', response
-      );
       setEvents(eventsData);
       
       // Extraire les catégories uniques

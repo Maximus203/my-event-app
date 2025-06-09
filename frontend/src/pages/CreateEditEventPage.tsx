@@ -6,7 +6,6 @@ import {
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { useToast } from '@/hooks/useToast';
 import { eventService } from '@/services/eventService';
-import type { EventFormData } from '@/types';
 import { motion } from 'framer-motion';
 import {
   AlertCircle,
@@ -26,9 +25,6 @@ interface EventForm {
   time: string;
   location: string;
   maxParticipants: string;
-  category: string;
-  price: string;
-  isPublic: boolean;
 }
 
 const CreateEditEventPage: React.FC = () => {
@@ -47,9 +43,6 @@ const CreateEditEventPage: React.FC = () => {
     time: '',
     location: '',
     maxParticipants: '',
-    category: '',
-    price: '',
-    isPublic: true
   });
 
   useEffect(() => {
@@ -58,35 +51,43 @@ const CreateEditEventPage: React.FC = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEdit, id]);
-
   const loadEvent = useCallback(async (eventId: string) => {
     setLoadingEvent(true);
     try {
-      // TODO: Remplacer par un appel API réel pour charger l'événement avec eventId
       console.log('Loading event with ID:', eventId);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await eventService.getEventById(eventId);
       
-      // Données simulées
-      const mockEvent = {
-        title: 'Conférence Tech 2025',
-        description: 'Découvrez les dernières innovations technologiques avec des experts du secteur. Cette conférence rassemblera les leaders de l\'industrie pour partager leurs connaissances et expériences.',
-        date: '2025-03-15',
-        time: '09:00',
-        location: 'Paris, France',
-        maxParticipants: '200',
-        category: 'Technologie',
-        price: '50',
-        isPublic: true
-      };
-      
-      setForm(mockEvent);
+      if (response.success && response.data) {
+        const event = response.data;
+        
+        // Convertir les données de l'événement au format du formulaire
+        const eventDate = new Date(event.date);
+        const formData = {
+          title: event.title,
+          description: event.description || '',
+          date: eventDate.toISOString().split('T')[0], // Format YYYY-MM-DD
+          time: eventDate.toTimeString().slice(0, 5), // Format HH:MM
+          location: event.location || '',
+          maxParticipants: event.maxParticipants ? event.maxParticipants.toString() : '',
+        };
+        
+        setForm(formData);
+      } else {
+        showToast({
+          type: 'error',
+          title: 'Erreur',
+          message: 'Événement non trouvé',
+        });
+        navigate('/events');
+      }
     } catch (error) {
+      console.error('Erreur lors du chargement de l\'événement:', error);
       handleError(error);
       navigate('/events');
     } finally {
       setLoadingEvent(false);
     }
-  }, [handleError, navigate]);
+  }, [handleError, navigate, showToast]);
 
   const validateForm = (): boolean => {
     if (!form.title.trim()) {
@@ -168,7 +169,6 @@ const CreateEditEventPage: React.FC = () => {
       setForm(prev => ({ ...prev, [name]: value }));
     }
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -180,39 +180,43 @@ const CreateEditEventPage: React.FC = () => {
 
     setIsLoading(true);
     
-    try {
-      // Préparer les données de l'événement selon le format EventFormData
+    try {      // Préparer les données de l'événement (exclure le champ tags qui n'existe pas dans le backend)
       const eventDateTime = new Date(`${form.date}T${form.time}`);
-      const eventData: EventFormData = {
+      const eventData = {
         title: form.title,
         description: form.description,
         date: eventDateTime.toISOString(),
         location: form.location,
         maxParticipants: form.maxParticipants ? parseInt(form.maxParticipants) : undefined,
-        tags: [], // Champ requis
       };
 
       let eventResult;
 
       if (isEdit && id) {
-        // Modification d'un événement existant - utiliser l'API standard
+        // Modification d'un événement existant
+        console.log('Updating event with ID:', id);
         eventResult = await eventService.updateEvent(id, eventData);
       } else {
-        // Création d'un nouvel événement - utiliser l'API standard
+        // Création d'un nouvel événement
+        console.log('Creating new event');
         eventResult = await eventService.createEvent(eventData);
       }
 
-      console.log('Événement sauvegardé:', eventResult);
-      
-      showToast({
-        type: 'success',
-        title: isEdit ? 'Événement modifié' : 'Événement créé',
-        message: isEdit 
-          ? 'Votre événement a été modifié avec succès !'
-          : 'Votre événement a été créé avec succès !',
-      });
-      
-      navigate('/events');
+      if (eventResult.success) {
+        console.log('Événement sauvegardé:', eventResult.data);
+        
+        showToast({
+          type: 'success',
+          title: isEdit ? 'Événement modifié' : 'Événement créé',
+          message: isEdit 
+            ? 'Votre événement a été modifié avec succès !'
+            : 'Votre événement a été créé avec succès !',
+        });
+        
+        navigate('/events');
+      } else {
+        throw new Error(eventResult.message || 'Erreur lors de la sauvegarde');
+      }
     } catch (error) {
       console.error('Erreur lors de la soumission:', error);
       handleError(error);

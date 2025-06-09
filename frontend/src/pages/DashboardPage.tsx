@@ -347,7 +347,7 @@ const DashboardPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                Bonjour, {user?.name} 👋
+                Bonjour, {user?.firstName + ' ' + user?.lastName} 👋
               </h1>
               <p className="text-lg text-gray-600 mt-2">
                 Gérez vos événements et suivez vos activités

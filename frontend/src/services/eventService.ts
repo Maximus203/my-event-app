@@ -1,4 +1,5 @@
-import type { Event, EventFilters, EventFormData, PaginationParams } from '@/types';
+import type { Event, EventFilters, PaginationParams, Participant } from '@/types';
+import type { CreateEventDto, UpdateEventDto } from '@/types/event';
 import type { ApiResponse } from './apiService';
 import { apiService } from './apiService';
 import { uploadService } from './uploadService';
@@ -54,12 +55,9 @@ class EventService {  // Récupérer tous les événements avec filtres et pagin
     
     const url = `/events${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     return apiService.get<EventsResponse>(url);
-  }
-
-  // Récupérer tous les événements (alias pour compatibilité)
-  async getAllEvents(): Promise<ApiResponse<any[]>> {
+  }  // Récupérer tous les événements (alias pour compatibilité)
+  async getAllEvents(): Promise<ApiResponse<Event[]>> {
     const response = await this.getEvents();
-    console.log("Event Service: ", response);
     return {
       ...response,
       data: response?.data || [],
@@ -70,14 +68,13 @@ class EventService {  // Récupérer tous les événements avec filtres et pagin
   async getEventById(id: string): Promise<ApiResponse<Event>> {
     return apiService.get<Event>(`/events/${id}`);
   }
-
   // Créer un nouvel événement
-  async createEvent(data: EventFormData): Promise<ApiResponse<Event>> {
+  async createEvent(data: CreateEventDto): Promise<ApiResponse<Event>> {
     return apiService.post<Event>('/events', data);
   }
 
   // Mettre à jour un événement
-  async updateEvent(id: string, data: Partial<EventFormData>): Promise<ApiResponse<Event>> {
+  async updateEvent(id: string, data: Partial<UpdateEventDto>): Promise<ApiResponse<Event>> {
     return apiService.put<Event>(`/events/${id}`, data);
   }
 
@@ -89,15 +86,15 @@ class EventService {  // Récupérer tous les événements avec filtres et pagin
   // Publier/dépublier un événement
   async toggleEventPublication(id: string): Promise<ApiResponse<Event>> {
     return apiService.post<Event>(`/events/${id}/toggle-publication`);
-  }
-  // S'inscrire à un événement
-  async registerForEvent(eventId: string): Promise<ApiResponse<void>> {
-    return apiService.post<void>(`/events/${eventId}/register`);
+  }  // S'inscrire à un événement (utilisateur connecté - nécessite email aussi)
+  async registerForEvent(eventId: string, email?: string): Promise<ApiResponse<void>> {
+    // Pour les utilisateurs connectés, utiliser l'email de leur profil si disponible
+    return apiService.post<void>(`/events/${eventId}/subscribe`, { email: email || '' });
   }
 
-  // Se désinscrire d'un événement
-  async unregisterFromEvent(eventId: string): Promise<ApiResponse<void>> {
-    return apiService.delete<void>(`/events/${eventId}/register`);
+  // Se désinscrire d'un événement (utilisateur connecté)
+  async unregisterFromEvent(eventId: string, email?: string): Promise<ApiResponse<void>> {
+    return apiService.post<void>(`/events/${eventId}/unsubscribe`, { email: email || '' });
   }
 
   // Alias pour compatibility
@@ -203,9 +200,22 @@ class EventService {  // Récupérer tous les événements avec filtres et pagin
   }): Promise<ApiResponse<void>> {
     return apiService.post<void>(`/events/${eventId}/notify`, data);
   }
+  // Récupérer les participants d'un événement (pour le propriétaire)
+  async getEventParticipants(eventId: string): Promise<ApiResponse<Participant[]>> {
+    return apiService.get<Participant[]>(`/events/${eventId}`);
+  }
+  // S'inscrire à un événement (nouvelle méthode avec email)
+  async subscribeToEvent(eventId: string, {email, name}: {email: string, name: string}): Promise<ApiResponse<Participant>> {
+    return apiService.post<Participant>(`/events/${eventId}/subscribe`, { email, name });
+  }
+
+  // Se désinscrire d'un événement (nouvelle méthode avec email)
+  async unsubscribeFromEvent(eventId: string, email: string): Promise<ApiResponse<void>> {
+    return apiService.post<void>(`/events/${eventId}/unsubscribe`, { email });
+  }
   // Créer un nouvel événement avec upload de fichiers
   async createEventWithFiles(
-    data: EventFormData,
+    data: CreateEventDto,
     files?: {
       imageUrl?: File;
       bannerImage?: File;
@@ -225,9 +235,9 @@ class EventService {  // Récupérer tous les événements avec filtres et pagin
       const uploadResponse = await uploadService.uploadEventMedia(filesToUpload);
       
       // Mettre à jour les URLs dans les données de l'événement
-      if (uploadResponse.imageUrl) (eventData as any).imageUrl = uploadResponse.imageUrl.url;
-      if (uploadResponse.bannerImage) (eventData as any).bannerImage = uploadResponse.bannerImage.url;
-      if (uploadResponse.videoUrl) (eventData as any).videoUrl = uploadResponse.videoUrl.url;
+      if (uploadResponse.imageUrl) eventData.imageUrl = uploadResponse.imageUrl.url;
+      if (uploadResponse.bannerImage) eventData.bannerImage = uploadResponse.bannerImage.url;
+      if (uploadResponse.videoUrl) eventData.videoUrl = uploadResponse.videoUrl.url;
     }
 
     return this.createEvent(eventData);
@@ -236,7 +246,7 @@ class EventService {  // Récupérer tous les événements avec filtres et pagin
   // Mettre à jour un événement avec upload de fichiers
   async updateEventWithFiles(
     id: string,
-    data: Partial<EventFormData>,
+    data: Partial<UpdateEventDto>,
     files?: {
       imageUrl?: File;
       bannerImage?: File;
@@ -256,9 +266,9 @@ class EventService {  // Récupérer tous les événements avec filtres et pagin
       const uploadResponse = await uploadService.uploadEventMedia(filesToUpload);
       
       // Mettre à jour les URLs dans les données de l'événement
-      if (uploadResponse.imageUrl) (eventData as any).imageUrl = uploadResponse.imageUrl.url;
-      if (uploadResponse.bannerImage) (eventData as any).bannerImage = uploadResponse.bannerImage.url;
-      if (uploadResponse.videoUrl) (eventData as any).videoUrl = uploadResponse.videoUrl.url;
+      if (uploadResponse.imageUrl) eventData.imageUrl = uploadResponse.imageUrl.url;
+      if (uploadResponse.bannerImage) eventData.bannerImage = uploadResponse.bannerImage.url;
+      if (uploadResponse.videoUrl) eventData.videoUrl = uploadResponse.videoUrl.url;
     }
 
     return this.updateEvent(id, eventData);

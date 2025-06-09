@@ -6,6 +6,7 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
+  name?: string;
   photo?: string;
   role: 'user' | 'admin' | 'organizer';
   isEmailVerified: boolean;
@@ -78,18 +79,12 @@ export interface Event {
   commentsCount?: number;
 }
 
-// ...existing code...
 export interface EventFormData {
   title: string;
   description: string;
-  imageUrl?: string;
-  bannerImage?: string;
-  videoUrl?: string;
   date: string;
   location: string;
   maxParticipants?: number;
-  tags: string[];
-  registrationDeadline?: string;
 }
 
 export interface EventFilters {
@@ -230,6 +225,18 @@ export interface Comment {
   isLiked?: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+// Participant types (aligné avec le backend)
+export interface Participant {
+  id: string;
+  email: string;
+  name?: string;
+  eventId: string;
+  event?: Event;
+  notified: boolean;
+  reminderSent: boolean;
+  createdAt: string;
 }
 
 // Statistics types

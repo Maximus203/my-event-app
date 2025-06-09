@@ -47,8 +47,6 @@ export function notFoundHandler(req: Request, res: Response, next: NextFunction)
         "POST /api/email/cron/stop",
         "POST /api/email/cron/manual-run",
         "POST /api/email/test-reminder/:eventId"
-        
-        
       ]
     }]
   );

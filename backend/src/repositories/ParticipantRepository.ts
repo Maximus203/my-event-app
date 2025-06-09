@@ -3,13 +3,13 @@
  */
 
 import { AppDataSource } from "../config/database";
-import { Participant } from "../entities/Participant";
 import { Event } from "../entities/Event";
+import { Participant } from "../entities/Participant";
 
 export const ParticipantRepository = AppDataSource.getRepository(Participant);
 
 export class ParticipantRepo {
-  static async subscribe(event: Event, email: string): Promise<Participant> {
+  static async subscribe(event: Event, email: string, name: string): Promise<Participant> {
     // Vérifier si le participant existe déjà
     const existingParticipant = await ParticipantRepository.findOne({
       where: { eventId: event.id, email },
@@ -22,6 +22,7 @@ export class ParticipantRepo {
     // Créer un nouveau participant
     const participant = ParticipantRepository.create({
       email,
+      name,
       event,
       eventId: event.id,
       notified: false,
