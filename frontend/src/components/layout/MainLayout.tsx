@@ -118,7 +118,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   >  {user?.photo ? (
                       <img
                         className="h-6 w-6 rounded-full"
-                        src={user.photo}
+                        src='/utilisateur.gif'
                         alt={user.firstName + " " + user.lastName || 'Utilisateur'}
                       />
                     ) : (

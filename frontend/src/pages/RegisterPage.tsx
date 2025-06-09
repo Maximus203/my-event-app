@@ -1,28 +1,22 @@
-import { Button, ImageUpload, Input } from '@/components/ui';
+import { Button, Input } from '@/components/ui';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { useToast } from '@/hooks/useToast';
+import { authService } from '@/services/authService';
+import type { RegisterData } from '@/types';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Lock, Mail, User, UserPlus } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-interface RegisterForm {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  photo?: string;
-}
 
 const RegisterPage: React.FC = () => {
-  const [form, setForm] = useState<RegisterForm>({
+  const [form, setForm] = useState<RegisterData>({
     firstName: '',
     lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
-    photo: ''
+    acceptTerms: false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -117,6 +111,8 @@ const RegisterPage: React.FC = () => {
     
     try {
       // TODO: Implémenter l'appel API d'inscription
+
+      await authService.register(form);
       await new Promise(resolve => setTimeout(resolve, 1500)); // Simulation
       
       showToast({
@@ -163,16 +159,6 @@ const RegisterPage: React.FC = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Photo de profil */}
-              <div className="flex justify-center mb-6">                
-              <ImageUpload
-                  onUpload={handleImageUpload}
-                  existingImages={form.photo ? [form.photo] : []}
-                  maxFiles={1}
-                  maxSizeInMB={2}
-                  acceptedFormats={['image/*']}
-                />
-              </div>
 
               {/* Prénom et Nom */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
