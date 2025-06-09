@@ -147,7 +147,7 @@ class AuthService {
 
   // Mettre à jour l'avatar (avec FormData)
   async updateAvatar(formData: FormData): Promise<ApiResponse<User>> {
-    const response = await apiService.post<User>('/auth/avatar', formData, {
+    const response = await apiService.post<User>('/upload/profile-photo', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       }

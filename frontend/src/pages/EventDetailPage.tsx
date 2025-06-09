@@ -99,7 +99,7 @@ const EventDetailPage: React.FC = () => {
     try {
       await eventService.deleteEvent(event.id);
       toast.success('Événement supprimé avec succès');
-      navigate('/dashboard');
+      navigate('/events');
     } catch (err) {
       console.error('Erreur lors de la suppression:', err);
       toast.error('Erreur lors de la suppression de l\'événement');
@@ -203,7 +203,9 @@ const EventDetailPage: React.FC = () => {
   }
 
   const registrationStatus = getRegistrationStatus();
-  const isOwner = user && user.id === event.organizerId;
+  const isOwner = user && user.id === event.createdById;
+  console.log("Event details:", event);
+  console.log("User details:", user);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:from-gray-950 dark:to-blue-950 dark:bg-gradient-to-br">
@@ -305,9 +307,9 @@ const EventDetailPage: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-gray-300">
-                    {event.organizer?.firstName} {event.organizer?.lastName}
+                    {event.createdBy?.firstName} {event.createdBy?.lastName}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400">{event.organizer?.email}</p>
+                  <p className="text-gray-600 dark:text-gray-400">{event.createdBy?.email}</p>
                 </div>
               </div>
             </motion.div>

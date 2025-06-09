@@ -1,7 +1,6 @@
 import { NotificationDropdown } from '@/components/ui/NotificationDropdown';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNotifications } from '@/hooks/useNotifications';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Calendar,
@@ -9,7 +8,6 @@ import {
   LogOut,
   Menu,
   Plus,
-  Settings,
   User,
   X
 } from 'lucide-react';
@@ -25,17 +23,15 @@ interface MainLayoutProps {
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-    const location = useLocation();
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);  const location = useLocation();
   const navigate = useNavigate();
-  const { unreadCount } = useNotifications();
   const { user, logout, isAuthenticated } = useAuth();
-  
-  // Navigation based on auth status
+    // Navigation based on auth status
   const navigation = [
     { name: 'Accueil', href: '/', icon: Home },
-    { name: 'Événements', href: '/events', icon: Calendar },
     { name: 'Créer un événement', href: '/events/new', icon: Plus, requiresAuth: true },
+    // { name: 'Mes événements', href: '/my-events', icon: User, requiresAuth: true },
+    { name: 'Événements', href: '/events', icon: Calendar },
   ];
 
   const handleSearchSubmit = (query: string) => {
@@ -79,29 +75,29 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               {/* Logo */}
               <Link to="/" className="flex items-center ml-4 md:ml-0">
                 <img src="/logo.png" alt="My Event Logo" className='h-16 w-auto' />
-              </Link>
-
-              {/* Navigation desktop */}
+              </Link>              {/* Navigation desktop */}
               <nav className="hidden md:ml-8 md:flex md:space-x-8">
-                {navigation.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = location.pathname === item.href;
-                  
-                  return (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-colors ${
-                        isActive
-                          ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-white'
-                      }`}
-                    >
-                      <Icon className="h-4 w-4 mr-2" />
-                      {item.name}
-                    </Link>
-                  );
-                })}
+                {navigation
+                  .filter(item => !item.requiresAuth || isAuthenticated)
+                  .map((item) => {
+                    const Icon = item.icon;
+                    const isActive = location.pathname === item.href;
+                    
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-colors ${
+                          isActive
+                            ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-white'
+                        }`}
+                      >
+                        <Icon className="h-4 w-4 mr-2" />
+                        {item.name}
+                      </Link>
+                    );
+                  })}
               </nav>
             </div>
 
@@ -158,16 +154,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                             <User className="h-4 w-4 mr-2" />
                             Mon profil
                           </Link>
-                          
-                          <Link
-                            to="/settings"
-                            onClick={() => setIsUserMenuOpen(false)}
-                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                          >
-                            <Settings className="h-4 w-4 mr-2" />
-                            Paramètres
-                          </Link>
-                          
+                                                    
                           <button
                             onClick={handleLogout}
                             className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
@@ -213,28 +200,29 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2 }}
               className="md:hidden border-t border-gray-200 dark:border-gray-700"
-            >
-              <div className="px-2 pt-2 pb-3 space-y-1">
-                {navigation.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = location.pathname === item.href;
-                  
-                  return (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                        isActive
-                          ? 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700'
-                      }`}
-                    >
-                      <Icon className="h-5 w-5 mr-3" />
-                      {item.name}
-                    </Link>
-                  );
-                })}
+            >              <div className="px-2 pt-2 pb-3 space-y-1">
+                {navigation
+                  .filter(item => !item.requiresAuth || isAuthenticated)
+                  .map((item) => {
+                    const Icon = item.icon;
+                    const isActive = location.pathname === item.href;
+                    
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                          isActive
+                            ? 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
+                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700'
+                        }`}
+                      >
+                        <Icon className="h-5 w-5 mr-3" />
+                        {item.name}
+                      </Link>
+                    );
+                  })}
               </div>
             </motion.div>
           )}
@@ -293,10 +281,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center">
-                <Calendar className="h-8 w-8 text-blue-600" />
-                <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">
-                  My Event
-                </span>
+                                <img src="/logo.png" alt="My Event Logo" className='h-16 w-auto' />
+
               </div>
               <p className="mt-2 text-gray-600 dark:text-gray-400">
                 Découvrez et organisez les meilleurs événements près de chez vous.
@@ -304,50 +290,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             </div>
             
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
-                Navigation
-              </h3>
-              <ul className="mt-4 space-y-2">
-                <li>
-                  <Link to="/events" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-                    Événements
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/search" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-                    Recherche
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/venues" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-                    Lieux
-                  </Link>
-                </li>
-              </ul>
             </div>
-            
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
-                Support
-              </h3>
-              <ul className="mt-4 space-y-2">
-                <li>
-                  <Link to="/help" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-                    Aide
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/contact" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-                    Contact
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/privacy" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-                    Confidentialité
-                  </Link>
-                </li>
-              </ul>
-            </div>
+
           </div>
           
           <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">

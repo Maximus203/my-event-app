@@ -77,7 +77,6 @@ export class FileUploadService {
       cb(new Error(`Type de fichier non supporté: ${file.mimetype}. Types autorisés: ${allowedTypes.join(", ")}`));
     }
   }
-
   /**
    * Configuration pour les uploads de photos de profil
    */
@@ -86,7 +85,7 @@ export class FileUploadService {
       storage: this.getProfileStorage(),
       fileFilter: this.fileFilter,
       limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB max
+        fileSize: 50 * 1024 * 1024, // 50MB max
         files: 1, // Une seule photo de profil
       },
     });
@@ -126,7 +125,7 @@ export class FileUploadService {
         this.logger.log("info", "Fichier supprimé avec succès", { filename, type });
         return true;
       } else {
-        this.logger.log("warning", "Fichier introuvable pour suppression", { filename, type });
+        this.logger.log("error", "Fichier introuvable pour suppression", { filename, type });
         return false;
       }
     } catch (error) {

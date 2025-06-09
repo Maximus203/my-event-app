@@ -35,7 +35,7 @@ export class CreateEventDto {
     {},
     { message: "Le nombre maximum de participants doit être un nombre" }
   )
-  @Min(1, { message: "Le nombre maximum de participants doit être au moins 1" })
+  @Min(0, { message: "Le nombre maximum de participants doit être au moins 0" })
   maxParticipants?: number;
   @IsOptional()
   @ValidateIf((o) => o.imageUrl !== undefined && o.imageUrl !== null && o.imageUrl !== "")

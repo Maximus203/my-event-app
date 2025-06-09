@@ -47,21 +47,19 @@ export interface Event {
   startDate: string; // Date de début (requis)
   endDate: string; // Date de fin (requis)
   location: string;
-  category: EventCategory;
   categories?: string[]; // Pour compatibilité avec certains écrans
   maxParticipants?: number;
   maxAttendees?: number; // Pour compatibilité
   currentParticipants?: number;
   participants?: string[];
   attendees?: string[]; // Pour compatibilité
-  organizer: User;
-  organizerId?: string;
+  createdBy: User;
+  createdById?: string;
   isPublic: boolean;
   registrationDeadline?: string;
   createdAt: string;
-  updatedAt: string;tags: string[];
-  price?: number;
-  currency?: string;
+  updatedAt: string;
+  tags: string[];
   featured?: boolean;
   isFeatured?: boolean;
   views?: number;
@@ -85,14 +83,12 @@ export interface EventFormData {
   title: string;
   description: string;
   imageUrl?: string;
+  bannerImage?: string;
+  videoUrl?: string;
   date: string;
   location: string;
-  category: EventCategory;
   maxParticipants?: number;
-  price?: number;
-  currency?: string;
   tags: string[];
-  isPublic: boolean;
   registrationDeadline?: string;
 }
 

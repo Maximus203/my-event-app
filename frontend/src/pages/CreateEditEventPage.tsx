@@ -1,11 +1,12 @@
 import {
   Button,
-  ImageUpload,
   Input,
   LoadingSpinner
 } from '@/components/ui';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { useToast } from '@/hooks/useToast';
+import { eventService } from '@/services/eventService';
+import type { EventFormData } from '@/types';
 import { motion } from 'framer-motion';
 import {
   AlertCircle,
@@ -28,22 +29,7 @@ interface EventForm {
   category: string;
   price: string;
   isPublic: boolean;
-  image?: string;
 }
-
-const categories = [
-  'Technologie',
-  'Sport',
-  'Culture',
-  'Cuisine',
-  'Art',
-  'Musique',
-  'Business',
-  'Éducation',
-  'Santé',
-  'Voyage',
-  'Autre'
-];
 
 const CreateEditEventPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -54,7 +40,6 @@ const CreateEditEventPage: React.FC = () => {
   const isEdit = Boolean(id);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingEvent, setLoadingEvent] = useState(isEdit);
-  
   const [form, setForm] = useState<EventForm>({
     title: '',
     description: '',
@@ -64,8 +49,7 @@ const CreateEditEventPage: React.FC = () => {
     maxParticipants: '',
     category: '',
     price: '',
-    isPublic: true,
-    image: ''
+    isPublic: true
   });
 
   useEffect(() => {
@@ -73,7 +57,9 @@ const CreateEditEventPage: React.FC = () => {
       loadEvent(id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, id]);  const loadEvent = useCallback(async (eventId: string) => {
+  }, [isEdit, id]);
+
+  const loadEvent = useCallback(async (eventId: string) => {
     setLoadingEvent(true);
     try {
       // TODO: Remplacer par un appel API réel pour charger l'événement avec eventId
@@ -90,11 +76,11 @@ const CreateEditEventPage: React.FC = () => {
         maxParticipants: '200',
         category: 'Technologie',
         price: '50',
-        isPublic: true,
-        image: '/events/tech-conf.jpg'
+        isPublic: true
       };
       
-      setForm(mockEvent);    } catch (error) {
+      setForm(mockEvent);
+    } catch (error) {
       handleError(error);
       navigate('/events');
     } finally {
@@ -148,15 +134,6 @@ const CreateEditEventPage: React.FC = () => {
       return false;
     }
 
-    if (!form.category) {
-      showToast({
-        type: 'warning',
-        title: 'Catégorie requise',
-        message: 'Veuillez sélectionner une catégorie pour votre événement.',
-      });
-      return false;
-    }
-
     // Vérifier que la date n'est pas dans le passé
     const eventDate = new Date(`${form.date}T${form.time}`);
     if (eventDate < new Date()) {
@@ -178,16 +155,6 @@ const CreateEditEventPage: React.FC = () => {
       return false;
     }
 
-    // Vérifier le prix
-    if (form.price && parseFloat(form.price) < 0) {
-      showToast({
-        type: 'error',
-        title: 'Prix invalide',
-        message: 'Le prix ne peut pas être négatif.',
-      });
-      return false;
-    }
-
     return true;
   };
 
@@ -201,17 +168,6 @@ const CreateEditEventPage: React.FC = () => {
       setForm(prev => ({ ...prev, [name]: value }));
     }
   };
-  const handleImageUpload = (files: File[]) => {
-    if (files.length > 0) {
-      const file = files[0];
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const imageData = e.target?.result as string;
-        setForm(prev => ({ ...prev, image: imageData }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -220,11 +176,33 @@ const CreateEditEventPage: React.FC = () => {
       return;
     }
 
+    console.log("Form data before submission:", form);
+
     setIsLoading(true);
     
     try {
-      // TODO: Implémenter l'appel API de création/modification
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Préparer les données de l'événement selon le format EventFormData
+      const eventDateTime = new Date(`${form.date}T${form.time}`);
+      const eventData: EventFormData = {
+        title: form.title,
+        description: form.description,
+        date: eventDateTime.toISOString(),
+        location: form.location,
+        maxParticipants: form.maxParticipants ? parseInt(form.maxParticipants) : undefined,
+        tags: [], // Champ requis
+      };
+
+      let eventResult;
+
+      if (isEdit && id) {
+        // Modification d'un événement existant - utiliser l'API standard
+        eventResult = await eventService.updateEvent(id, eventData);
+      } else {
+        // Création d'un nouvel événement - utiliser l'API standard
+        eventResult = await eventService.createEvent(eventData);
+      }
+
+      console.log('Événement sauvegardé:', eventResult);
       
       showToast({
         type: 'success',
@@ -236,25 +214,7 @@ const CreateEditEventPage: React.FC = () => {
       
       navigate('/events');
     } catch (error) {
-      handleError(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSaveAsDraft = async () => {
-    setIsLoading(true);
-    
-    try {
-      // TODO: Implémenter la sauvegarde en brouillon
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      showToast({
-        type: 'success',
-        title: 'Brouillon sauvegardé',
-        message: 'Votre événement a été sauvegardé en brouillon.',
-      });
-    } catch (error) {
+      console.error('Erreur lors de la soumission:', error);
       handleError(error);
     } finally {
       setIsLoading(false);
@@ -270,8 +230,7 @@ const CreateEditEventPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50  dark:from-blue-950 dark:to-indigo-950 bg-gradient-to-br transition-colors duration-300">
-
+    <div className="min-h-screen bg-gray-50 dark:from-blue-950 dark:to-indigo-950 bg-gradient-to-br transition-colors duration-300">
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
@@ -295,20 +254,6 @@ const CreateEditEventPage: React.FC = () => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-8">
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-              {/* Image de l'événement */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Image de l'événement
-                </label>                
-                <ImageUpload
-                  onUpload={handleImageUpload}
-                  existingImages={form.image ? [form.image] : []}
-                  maxFiles={1}
-                  maxSizeInMB={5}
-                  acceptedFormats={['image/*']}
-                />
-              </div>
-
               {/* Informations de base */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="lg:col-span-2">
@@ -376,7 +321,6 @@ const CreateEditEventPage: React.FC = () => {
                   />
                 </div>
 
-
                 <Input
                   label="Nombre maximum de participants"
                   type="number"
@@ -389,7 +333,6 @@ const CreateEditEventPage: React.FC = () => {
                   max="10000"
                   fullWidth
                 />
-
               </div>
             </div>
 
@@ -401,7 +344,6 @@ const CreateEditEventPage: React.FC = () => {
                   <p className="font-medium mb-1">Conseils pour un événement réussi :</p>
                   <ul className="list-disc list-inside space-y-1 text-xs">
                     <li>Utilisez un titre accrocheur et descriptif</li>
-                    <li>Ajoutez une image attractive pour votre événement</li>
                     <li>Soyez précis sur le lieu et l'heure</li>
                     <li>Décrivez clairement ce qui attend les participants</li>
                   </ul>
@@ -411,15 +353,19 @@ const CreateEditEventPage: React.FC = () => {
 
             {/* Actions */}
             <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4">
-   
-
-              <div className="flex space-x-3">
-
+              <div className="flex justify-center space-x-3 w-full">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => navigate('/events')}
+                  size="lg"
+                >
+                  Annuler
+                </Button>
                 <Button
                   type="submit"
                   loading={isLoading}
                   size="lg"
-                  onSubmit={handleSubmit}
                 >
                   {isEdit ? 'Modifier l\'événement' : 'Créer l\'événement'}
                 </Button>

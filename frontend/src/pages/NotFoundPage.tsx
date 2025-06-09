@@ -4,7 +4,6 @@ import { FaArrowLeft, FaCalendarAlt, FaHome, FaSearch } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 
 // Import des composants
-import Layout from '@/components/Layout';
 import { Button, Card } from '@/components/ui';
 
 const NotFoundPage: React.FC = () => {
@@ -36,7 +35,6 @@ const NotFoundPage: React.FC = () => {
   ];
 
   return (
-    <Layout>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -226,7 +224,6 @@ const NotFoundPage: React.FC = () => {
           ))}
         </div>
       </motion.div>
-    </Layout>
   );
 };
 

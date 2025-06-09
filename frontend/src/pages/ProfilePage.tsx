@@ -1,24 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import {
-    FaBell,
-    FaCalendar,
-    FaCamera,
-    FaChartBar,
-    FaEdit,
-    FaEnvelope,
-    FaGlobe,
-    FaHeart,
-    FaInstagram,
-    FaLinkedin,
-    FaLock,
-    FaMapMarkerAlt,
-    FaPhone,
-    FaSave,
-    FaTimes,
-    FaTwitter,
-    FaUser,
-    FaUsers
+  FaBell,
+  FaCalendar,
+  FaCamera,
+  FaChartBar,
+  FaEdit,
+  FaEnvelope,
+  FaGlobe,
+  FaHeart,
+  FaInstagram,
+  FaLinkedin,
+  FaLock,
+  FaMapMarkerAlt,
+  FaPhone,
+  FaSave,
+  FaTimes,
+  FaTwitter,
+  FaUser,
+  FaUsers
 } from 'react-icons/fa';
 
 // Import des contextes et services
@@ -66,8 +66,7 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     if (user) {
       setProfileForm({
-        name: user.name || '',
-        phone: user.phone || '',
+        name: user.firstName + ' ' + user.lastName || '',
         location: user.location || '',
         bio: user.bio || '',
         birthDate: user.birthDate || '',
@@ -200,16 +199,16 @@ const ProfilePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-8 dark:bg-gradient-to-br dark:from-blue-950 dark:to-indigo-950 from-blue-50 to-indigo-100">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6 dark:bg-gray-800 ">
           <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
             {/* Avatar */}
             <div className="relative">
               <img
-                src={user.avatar || '/default-avatar.png'}
-                alt={user.name}
+                src={user.photo || '/default-avatar.jpg'}
+                alt={user.firstName + ' ' + user.lastName}
                 className="w-24 h-24 rounded-full object-cover border-4 border-gray-200"
               />
               <button
@@ -218,7 +217,7 @@ const ProfilePage: React.FC = () => {
                 className="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-2 hover:bg-blue-700 transition-colors disabled:opacity-50"
               >
                 {avatarUploading ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-500 border-t-transparent"></div>
                 ) : (
                   <FaCamera className="w-4 h-4" />
                 )}
@@ -234,8 +233,8 @@ const ProfilePage: React.FC = () => {
 
             {/* Informations utilisateur */}
             <div className="flex-1 text-center sm:text-left">
-              <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
-              <p className="text-gray-600">{user.email}</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{user.firstName + ' ' + user.lastName}</h1>
+              <p className="text-gray-600 dark:text-gray-300">{user.email}</p>
               {user.location && (
                 <div className="flex items-center justify-center sm:justify-start mt-2 text-gray-500">
                   <FaMapMarkerAlt className="w-4 h-4 mr-1" />
@@ -243,7 +242,7 @@ const ProfilePage: React.FC = () => {
                 </div>
               )}
               {user.bio && (
-                <p className="mt-2 text-gray-700">{user.bio}</p>
+                <p className="mt-2 text-gray-700 dark:text-gray-300">{user.bio}</p>
               )}
             </div>
 
@@ -254,14 +253,14 @@ const ProfilePage: React.FC = () => {
                   <button
                     onClick={handleSaveProfile}
                     disabled={isUpdating}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center space-x-2"
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center space-x-2 dark:bg-green-400 dark:hover:bg-green-500 dark:text-white"
                   >
                     <FaSave className="w-4 h-4" />
                     <span>{isUpdating ? 'Sauvegarde...' : 'Sauvegarder'}</span>
                   </button>
                   <button
                     onClick={() => setIsEditing(false)}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center space-x-2"
+                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center space-x-2 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
                   >
                     <FaTimes className="w-4 h-4" />
                     <span>Annuler</span>
@@ -281,9 +280,9 @@ const ProfilePage: React.FC = () => {
         </div>
 
         {/* Onglets */}
-        <div className="bg-white rounded-lg shadow-sm">
+        <div className="bg-white rounded-lg shadow-sm dark:bg-gray-800">
           {/* Navigation des onglets */}
-          <div className="border-b border-gray-200">
+          <div className="border-b border-gray-200 dark:border-gray-700">
             <nav className="flex space-x-8 px-6">              {[
                 { id: 'profile' as const, label: 'Profil', icon: FaUser },
                 { id: 'preferences' as const, label: 'Préférences', icon: FaBell },
@@ -296,7 +295,7 @@ const ProfilePage: React.FC = () => {
                   className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
                     activeTab === id
                       ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:hover:text-gray-300 dark:text-gray-400 dark:hover:border-gray-600'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -310,11 +309,11 @@ const ProfilePage: React.FC = () => {
           <div className="p-6">
             {activeTab === 'profile' && (
               <div className="space-y-6">
-                <h2 className="text-lg font-semibold text-gray-900">Informations personnelles</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-300">Informations personnelles</h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Nom complet *
                     </label>
                     {isEditing ? (
@@ -325,22 +324,22 @@ const ProfilePage: React.FC = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     ) : (
-                      <p className="text-gray-900">{user.name}</p>
+                      <p className="text-gray-900 dark:text-gray-300">{user.firstName + ' ' + user.lastName}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Email
                     </label>
-                    <p className="text-gray-900 flex items-center">
+                    <p className="text-gray-900 flex items-center dark:text-gray-300">
                       <FaEnvelope className="w-4 h-4 mr-2 text-gray-400" />
                       {user.email}
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Téléphone
                     </label>
                     {isEditing ? (
@@ -351,7 +350,7 @@ const ProfilePage: React.FC = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     ) : (
-                      <p className="text-gray-900 flex items-center">
+                      <p className="text-gray-900 flex items-center dark:text-gray-300">
                         <FaPhone className="w-4 h-4 mr-2 text-gray-400" />
                         {user.phone || 'Non renseigné'}
                       </p>
@@ -359,7 +358,7 @@ const ProfilePage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Localisation
                     </label>
                     {isEditing ? (
@@ -370,7 +369,7 @@ const ProfilePage: React.FC = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     ) : (
-                      <p className="text-gray-900 flex items-center">
+                      <p className="text-gray-900 flex items-center dark:text-gray-300">
                         <FaMapMarkerAlt className="w-4 h-4 mr-2 text-gray-400" />
                         {user.location || 'Non renseigné'}
                       </p>
@@ -378,7 +377,7 @@ const ProfilePage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Date de naissance
                     </label>
                     {isEditing ? (
@@ -389,7 +388,7 @@ const ProfilePage: React.FC = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     ) : (
-                      <p className="text-gray-900 flex items-center">
+                      <p className="text-gray-900 flex items-center dark:text-gray-300">
                         <FaCalendar className="w-4 h-4 mr-2 text-gray-400" />
                         {user.birthDate ? new Date(user.birthDate).toLocaleDateString('fr-FR') : 'Non renseigné'}
                       </p>
@@ -398,7 +397,7 @@ const ProfilePage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Biographie
                   </label>
                   {isEditing ? (
@@ -410,13 +409,13 @@ const ProfilePage: React.FC = () => {
                       placeholder="Parlez-nous de vous..."
                     />
                   ) : (
-                    <p className="text-gray-900">{user.bio || 'Aucune biographie renseignée'}</p>
+                    <p className="text-gray-900 dark:text-gray-300">{user.bio || 'Aucune biographie renseignée'}</p>
                   )}
                 </div>
 
                 {/* Liens sociaux */}
                 <div>
-                  <h3 className="text-md font-medium text-gray-900 mb-4">Liens sociaux</h3>
+                  <h3 className="text-md font-medium text-gray-900 dark:text-gray-300 mb-4">Liens sociaux</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[
                       { key: 'website', label: 'Site web', icon: FaGlobe, placeholder: 'https://monsite.com' },
@@ -425,7 +424,7 @@ const ProfilePage: React.FC = () => {
                       { key: 'instagram', label: 'Instagram', icon: FaInstagram, placeholder: 'https://instagram.com/profil' },
                     ].map(({ key, label, icon: Icon, placeholder }) => (
                       <div key={key}>
-                        <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
+                        <label className="flex items-center text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
                           <Icon className="w-4 h-4 mr-2" />
                           {label}
                         </label>
@@ -438,7 +437,7 @@ const ProfilePage: React.FC = () => {
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           />
                         ) : (
-                          <p className="text-gray-900">
+                          <p className="text-gray-900 dark:text-gray-300">
                             {user.socialLinks?.[key as keyof typeof user.socialLinks] || 'Non renseigné'}
                           </p>
                         )}
@@ -451,7 +450,7 @@ const ProfilePage: React.FC = () => {
 
             {activeTab === 'preferences' && (
               <div className="space-y-6">
-                <h2 className="text-lg font-semibold text-gray-900">Préférences de notification</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Préférences de notification</h2>
                 
                 <div className="space-y-4">
                   {[
@@ -571,7 +570,7 @@ const ProfilePage: React.FC = () => {
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Mot de passe actuel
                 </label>
                 <input
@@ -583,7 +582,7 @@ const ProfilePage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Nouveau mot de passe
                 </label>
                 <input
@@ -595,7 +594,7 @@ const ProfilePage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Confirmer le nouveau mot de passe
                 </label>
                 <input

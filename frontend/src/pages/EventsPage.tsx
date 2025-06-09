@@ -93,8 +93,7 @@ const EventsPage: React.FC = () => {
           return new Date(a.date).getTime() - new Date(b.date).getTime();
         case 'location':
           return a.location.localeCompare(b.location);
-        case 'price':
-          return (a.price || 0) - (b.price || 0);
+
         case 'popularity':
           return (b.attendees?.length || 0) - (a.attendees?.length || 0);
         case 'featured':
@@ -186,8 +185,6 @@ const EventsPage: React.FC = () => {
           return new Date(a.date).getTime() - new Date(b.date).getTime();
         case 'location':
           return a.location.localeCompare(b.location);
-        case 'price':
-          return (a.price || 0) - (b.price || 0);
         case 'popularity':
           return (b.attendees?.length || 0) - (a.attendees?.length || 0);
         case 'featured':

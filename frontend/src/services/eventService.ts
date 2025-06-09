@@ -1,6 +1,7 @@
 import type { Event, EventFilters, EventFormData, PaginationParams } from '@/types';
 import type { ApiResponse } from './apiService';
 import { apiService } from './apiService';
+import { uploadService } from './uploadService';
 
 export interface EventsResponse {
   events: Event[];
@@ -201,6 +202,66 @@ class EventService {  // Récupérer tous les événements avec filtres et pagin
     type: 'email' | 'push' | 'both';
   }): Promise<ApiResponse<void>> {
     return apiService.post<void>(`/events/${eventId}/notify`, data);
+  }
+  // Créer un nouvel événement avec upload de fichiers
+  async createEventWithFiles(
+    data: EventFormData,
+    files?: {
+      imageUrl?: File;
+      bannerImage?: File;
+      videoUrl?: File;
+    }
+  ): Promise<ApiResponse<Event>> {
+    const eventData = { ...data };
+
+    // Uploader les fichiers d'abord si ils existent
+    if (files && Object.keys(files).some(key => files[key as keyof typeof files])) {
+      const filesToUpload: { [key: string]: File } = {};
+      
+      if (files.imageUrl) filesToUpload.imageUrl = files.imageUrl;
+      if (files.bannerImage) filesToUpload.bannerImage = files.bannerImage;
+      if (files.videoUrl) filesToUpload.videoUrl = files.videoUrl;
+
+      const uploadResponse = await uploadService.uploadEventMedia(filesToUpload);
+      
+      // Mettre à jour les URLs dans les données de l'événement
+      if (uploadResponse.imageUrl) (eventData as any).imageUrl = uploadResponse.imageUrl.url;
+      if (uploadResponse.bannerImage) (eventData as any).bannerImage = uploadResponse.bannerImage.url;
+      if (uploadResponse.videoUrl) (eventData as any).videoUrl = uploadResponse.videoUrl.url;
+    }
+
+    return this.createEvent(eventData);
+  }
+
+  // Mettre à jour un événement avec upload de fichiers
+  async updateEventWithFiles(
+    id: string,
+    data: Partial<EventFormData>,
+    files?: {
+      imageUrl?: File;
+      bannerImage?: File;
+      videoUrl?: File;
+    }
+  ): Promise<ApiResponse<Event>> {
+    const eventData = { ...data };
+
+    // Uploader les nouveaux fichiers si ils existent
+    if (files && Object.keys(files).some(key => files[key as keyof typeof files])) {
+      const filesToUpload: { [key: string]: File } = {};
+      
+      if (files.imageUrl) filesToUpload.imageUrl = files.imageUrl;
+      if (files.bannerImage) filesToUpload.bannerImage = files.bannerImage;
+      if (files.videoUrl) filesToUpload.videoUrl = files.videoUrl;
+
+      const uploadResponse = await uploadService.uploadEventMedia(filesToUpload);
+      
+      // Mettre à jour les URLs dans les données de l'événement
+      if (uploadResponse.imageUrl) (eventData as any).imageUrl = uploadResponse.imageUrl.url;
+      if (uploadResponse.bannerImage) (eventData as any).bannerImage = uploadResponse.bannerImage.url;
+      if (uploadResponse.videoUrl) (eventData as any).videoUrl = uploadResponse.videoUrl.url;
+    }
+
+    return this.updateEvent(id, eventData);
   }
 }
 
