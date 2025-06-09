@@ -3,12 +3,12 @@
  */
 
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  ManyToOne,
+  Entity,
   JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
 } from "typeorm";
 import { Event } from "./Event";
 
@@ -16,9 +16,11 @@ import { Event } from "./Event";
 export class Participant {
   @PrimaryGeneratedColumn("uuid")
   id: string;
-
   @Column()
   email: string;
+
+  @Column({ nullable: true })
+  name: string;
 
   @ManyToOne(() => Event, (event) => event.participants, {
     onDelete: "CASCADE",
@@ -28,9 +30,11 @@ export class Participant {
 
   @Column()
   eventId: string;
-
   @Column({ default: false })
   notified: boolean;
+
+  @Column({ default: false })
+  reminderSent: boolean;
 
   @CreateDateColumn()
   createdAt: Date;

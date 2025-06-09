@@ -3,9 +3,10 @@
  * Utilise class-transformer + class-validator
  */
 
-import { Request, Response, NextFunction } from "express";
 import { plainToClass } from "class-transformer";
 import { validate, ValidationError } from "class-validator";
+import { NextFunction, Request, Response } from "express";
+import { ResponseFormatter } from "../utils/ResponseFormatter";
 
 export function validateDto(dtoClass: any) {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -17,19 +18,18 @@ export function validateDto(dtoClass: any) {
       const errors: ValidationError[] = await validate(dto);
       if (errors.length > 0) {
         // Formater les erreurs de validation
-        const errorMessages = errors.map((error) => {
+        const errorDetails = errors.map((error) => {
           const constraints = error.constraints;
-          if (constraints) {
-            return Object.values(constraints).join(", ");
-          }
-          return "Erreur de validation";
+          return {
+            field: error.property,
+            value: error.value,
+            errors: constraints ? Object.values(constraints) : ["Erreur de validation"],
+          };
         });
 
-        res.status(400).json({
-          success: false,
-          message: `Erreurs de validation: ${errorMessages.join("; ")}`,
-          data: null,
-        });
+        const errorMessages = errorDetails.map((detail) => `${detail.field}: ${detail.errors.join(", ")}`);
+
+        ResponseFormatter.error(res, `Erreurs de validation: ${errorMessages.join("; ")}`, 400, errorDetails);
         return;
       }
 
@@ -37,11 +37,12 @@ export function validateDto(dtoClass: any) {
       req.body = dto;
       next();
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Erreur lors de la validation des données",
-        data: null,
-      });
+      ResponseFormatter.error(
+        res,
+        "Erreur lors de la validation des données",
+        500,
+        [{ error: error instanceof Error ? error.message : String(error) }]
+      );
       return;
     }
   };

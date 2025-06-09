@@ -3,17 +3,17 @@
  */
 
 import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ManyToOne,
-  OneToMany,
-  JoinColumn,
+    Column,
+    CreateDateColumn,
+    Entity,
+    JoinColumn,
+    ManyToOne,
+    OneToMany,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn,
 } from "typeorm";
-import { User } from "./User";
 import { Participant } from "./Participant";
+import { User } from "./User";
 
 @Entity()
 export class Event {
@@ -29,10 +29,20 @@ export class Event {
   date: Date;
 
   @Column({ nullable: true })
-  location: string;
+  location: string;  @Column({ nullable: true })
+  maxParticipants: number;
 
   @Column({ nullable: true })
-  maxParticipants: number;
+  imageUrl: string;
+
+  @Column({ nullable: true })
+  bannerImage: string;
+
+  @Column({ nullable: true })
+  videoUrl: string;
+
+  @Column({ default: true })
+  isActive: boolean;
 
   @ManyToOne(() => User, (user) => user.events, { eager: true })
   @JoinColumn({ name: "createdById" })

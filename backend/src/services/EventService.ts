@@ -3,18 +3,18 @@
  * Vérification des droits (créateur ou admin)
  */
 
-import { EventRepo } from "../repositories/EventRepository";
-import { UserRepo } from "../repositories/UserRepository";
-import { ParticipantRepo } from "../repositories/ParticipantRepository";
 import { CreateEventDto } from "../dtos/CreateEventDto";
 import { UpdateEventDto } from "../dtos/UpdateEventDto";
 import { UserRole } from "../entities/User";
-import { Logger } from "../utils/Logger";
+import { EventRepo } from "../repositories/EventRepository";
+import { ParticipantRepo } from "../repositories/ParticipantRepository";
+import { UserRepo } from "../repositories/UserRepository";
 import {
-  sendMail,
   getConfirmationEmailTemplate,
   getReminderEmailTemplate,
+  sendMail,
 } from "../utils/EmailUtils";
+import { Logger } from "../utils/Logger";
 
 export class EventService {
   private static logger = Logger.getInstance();
@@ -28,15 +28,16 @@ export class EventService {
       const creator = await UserRepo.findById(createdById);
       if (!creator) {
         throw new Error("Utilisateur créateur non trouvé");
-      }
-
-      const event = await EventRepo.createEvent(
+      }      const event = await EventRepo.createEvent(
         eventData.title,
         eventData.description,
         new Date(eventData.date),
         eventData.location,
         eventData.maxParticipants,
-        creator
+        creator,
+        eventData.imageUrl,
+        eventData.bannerImage,
+        eventData.videoUrl
       );
 
       this.logger.log("info", "Événement créé avec succès", {

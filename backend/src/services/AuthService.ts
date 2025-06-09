@@ -4,9 +4,10 @@
  */
 
 import bcrypt from "bcryptjs";
-import { UserRepo } from "../repositories/UserRepository";
-import { RegisterUserDto } from "../dtos/RegisterUserDto";
 import { LoginUserDto } from "../dtos/LoginUserDto";
+import { RegisterUserDto } from "../dtos/RegisterUserDto";
+import { UpdateUserDto } from "../dtos/UpdateUserDto";
+import { UserRepo } from "../repositories/UserRepository";
 import { generateToken } from "../utils/JwtUtils";
 import { Logger } from "../utils/Logger";
 
@@ -135,6 +136,62 @@ export class AuthService {
           userId,
         }
       );
+      throw error;
+    }
+  }
+
+  /**
+   * Mettre à jour les informations d'un utilisateur
+   */
+  static async updateUser(userId: string, updateData: UpdateUserDto) {
+    try {
+      const user = await UserRepo.findById(userId);
+      if (!user) {
+        throw new Error("Utilisateur non trouvé");
+      }
+
+      // Mettre à jour les champs fournis
+      if (updateData.email) {
+        // Vérifier si l'email est déjà utilisé par un autre utilisateur
+        const existingUser = await UserRepo.findByEmail(updateData.email);
+        if (existingUser && existingUser.id !== userId) {
+          throw new Error("Cet email est déjà utilisé");
+        }
+        user.email = updateData.email;
+      }
+
+      if (updateData.firstName) {
+        user.firstName = updateData.firstName;
+      }
+
+      if (updateData.lastName) {
+        user.lastName = updateData.lastName;
+      }
+
+      if (updateData.photo) {
+        user.photo = updateData.photo;
+      }
+
+      const updatedUser = await UserRepo.updateUser(user);
+
+      this.logger.log("info", "Profil utilisateur mis à jour avec succès", {
+        userId: updatedUser.id,
+        email: updatedUser.email,
+      });
+
+      return {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        photo: updatedUser.photo,
+        createdAt: updatedUser.createdAt,
+      };
+    } catch (error) {
+      this.logger.log("error", "Erreur lors de la mise à jour de l'utilisateur", {
+        error: error instanceof Error ? error.message : String(error),
+        userId,
+      });
       throw error;
     }
   }

@@ -5,3 +5,11 @@ node_modules/
 dist/
 *.sqlite
 dist
+
+# Dossiers d'uploads
+uploads/
+!uploads/.gitkeep
+
+# Fichiers temporaires
+*.tmp
+*.temp

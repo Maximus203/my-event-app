@@ -15,7 +15,10 @@ export class EventRepo {
     date: Date,
     location: string | undefined,
     maxParticipants: number | undefined,
-    createdBy: User
+    createdBy: User,
+    imageUrl?: string,
+    bannerImage?: string,
+    videoUrl?: string
   ): Promise<Event> {
     const event = EventRepository.create({
       title,
@@ -23,6 +26,9 @@ export class EventRepo {
       date,
       location,
       maxParticipants,
+      imageUrl,
+      bannerImage,
+      videoUrl,
       createdBy,
       createdById: createdBy.id,
     });
@@ -50,10 +56,9 @@ export class EventRepo {
       relations: ["createdBy", "participants"],
     });
   }
-
   static async updateEvent(
     id: string,
-    updates: Partial<Pick<Event, "title" | "description" | "date">>
+    updates: Partial<Pick<Event, "title" | "description" | "date" | "location" | "maxParticipants" | "imageUrl" | "bannerImage" | "videoUrl">>
   ): Promise<Event | null> {
     await EventRepository.update(id, updates);
     return await this.findById(id);

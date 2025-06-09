@@ -3,10 +3,10 @@
  * Décode JWT (jsonwebtoken), ajoute req.user ou renvoie 401
  */
 
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import { verifyToken } from "../utils/JwtUtils";
-import { ResponseFormatter } from "../utils/ResponseFormatter";
 import { Logger } from "../utils/Logger";
+import { ResponseFormatter } from "../utils/ResponseFormatter";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -25,15 +25,35 @@ export function authenticateJwt(
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      ResponseFormatter.error(res, "Token d'authentification manquant", 401);
+      ResponseFormatter.error(
+        res,
+        "Token d'authentification manquant",
+        401,
+        [
+          {
+            error: "Authorization header required",
+            format: "Bearer <token>",
+            received: "null",
+          },
+        ]
+      );
       return;
-    } // Vérifier le format "Bearer <token>"
+    }
+
+    // Vérifier le format "Bearer <token>"
     const tokenParts = authHeader.split(" ");
     if (tokenParts.length !== 2 || tokenParts[0] !== "Bearer") {
       ResponseFormatter.error(
         res,
         "Format de token invalide. Utilisez: Bearer <token>",
-        401
+        401,
+        [
+          {
+            error: "Invalid token format",
+            expected: "Bearer <token>",
+            received: authHeader,
+          },
+        ]
       );
       return;
     }
@@ -43,7 +63,17 @@ export function authenticateJwt(
     // Vérifier et décoder le token
     const payload = verifyToken(token);
     if (!payload) {
-      ResponseFormatter.error(res, "Token invalide ou expiré", 401);
+      ResponseFormatter.error(
+        res,
+        "Token invalide ou expiré",
+        401,
+        [
+          {
+            error: "JWT verification failed",
+            token: token.substring(0, 20) + "...",
+          },
+        ]
+      );
       return;
     }
 
@@ -68,6 +98,16 @@ export function authenticateJwt(
       method: req.method,
     });
 
-    ResponseFormatter.error(res, "Erreur d'authentification", 401);
+    ResponseFormatter.error(
+      res,
+      "Erreur d'authentification",
+      401,
+      [
+        {
+          error: error instanceof Error ? error.message : String(error),
+          type: "JWT_AUTH_ERROR",
+        },
+      ]
+    );
   }
 }

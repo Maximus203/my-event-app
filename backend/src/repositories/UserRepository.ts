@@ -44,4 +44,8 @@ export class UserRepo {
       order: { createdAt: "DESC" },
     });
   }
+
+  static async updateUser(user: User): Promise<User> {
+    return await UserRepository.save(user);
+  }
 }

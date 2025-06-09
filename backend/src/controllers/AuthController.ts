@@ -4,11 +4,12 @@
  */
 
 import { Request, Response } from "express";
-import { AuthService } from "../services/AuthService";
-import { RegisterUserDto } from "../dtos/RegisterUserDto";
 import { LoginUserDto } from "../dtos/LoginUserDto";
-import { ResponseFormatter } from "../utils/ResponseFormatter";
+import { RegisterUserDto } from "../dtos/RegisterUserDto";
+import { UpdateUserDto } from "../dtos/UpdateUserDto";
+import { AuthService } from "../services/AuthService";
 import { Logger } from "../utils/Logger";
+import { ResponseFormatter } from "../utils/ResponseFormatter";
 
 export class AuthController {
   private static logger = Logger.getInstance();
@@ -97,6 +98,38 @@ export class AuthController {
           ? error.message
           : "Erreur lors de la récupération du profil";
       ResponseFormatter.error(res, message, 404);
+    }
+  }
+  /**
+   * Mettre à jour le profil de l'utilisateur connecté
+   */
+  static async updateProfile(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).user?.userId;
+      if (!userId) {
+        ResponseFormatter.error(res, "Token invalide", 401);
+        return;
+      }
+
+      const updateData: UpdateUserDto = req.body;
+      const updatedUser = await AuthService.updateUser(userId, updateData);
+
+      AuthController.logger.log("info", "Profil mis à jour avec succès", {
+        userId,
+      });
+
+      ResponseFormatter.success(res, updatedUser, "Profil mis à jour avec succès");
+    } catch (error) {
+      AuthController.logger.log("error", "Erreur lors de la mise à jour du profil", {
+        error: error instanceof Error ? error.message : String(error),
+        userId: (req as any).user?.userId,
+      });
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Erreur lors de la mise à jour du profil";
+      ResponseFormatter.error(res, message, 400);
     }
   }
 }

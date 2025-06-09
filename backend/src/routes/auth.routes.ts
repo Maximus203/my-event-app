@@ -6,10 +6,11 @@
 
 import { Router } from "express";
 import { AuthController } from "../controllers/AuthController";
-import { validateDto } from "../middlewares/validateDto";
-import { authenticateJwt } from "../middlewares/authenticateJwt";
-import { RegisterUserDto } from "../dtos/RegisterUserDto";
 import { LoginUserDto } from "../dtos/LoginUserDto";
+import { RegisterUserDto } from "../dtos/RegisterUserDto";
+import { UpdateUserDto } from "../dtos/UpdateUserDto";
+import { authenticateJwt } from "../middlewares/authenticateJwt";
+import { validateDto } from "../middlewares/validateDto";
 
 const router = Router();
 
@@ -30,5 +31,11 @@ router.post("/login", validateDto(LoginUserDto), AuthController.login);
  * Récupérer le profil de l'utilisateur connecté
  */
 router.get("/profile", authenticateJwt, AuthController.getProfile);
+
+/**
+ * PUT /api/auth/profile
+ * Mettre à jour le profil de l'utilisateur connecté
+ */
+router.put("/profile", authenticateJwt, validateDto(UpdateUserDto), AuthController.updateProfile);
 
 export default router;
